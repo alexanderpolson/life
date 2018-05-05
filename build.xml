@@ -1,0 +1,118 @@
+<!--
+ * This file Copyright (c) 2004 Orbital Software
+ * $Id$
+ * Author: $Author$
+ * Overview:
+ *   Main build file for life.
+-->
+<project
+  name="life"
+  basedir="."
+  default="compile"
+>
+  <description>A customizable version of the game of life.</description>
+
+  <dirname property="life.basedir" file="${ant.file.life}"/>
+
+  <property file="${user.home}/build.properties"/>
+  <property file="${life.basedir}/default.properties"/>
+  <property file="${life.basedir}/build.properties"/>
+
+  <!-- BEGIN path declarations -->
+  <path id="classpath.build">
+    <fileset dir="${project.lib}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="classpath.build.classes">
+    <pathelement location="${build.classes}"/>
+  </path>
+
+  <path id="classpath.run">
+    <pathelement location="${build.classes}"/>
+    <path refid="classpath.build"/>
+  </path>
+  <!-- END   path declarations -->
+
+  <target
+    name="prerequisites.project"
+    description="Checks whether or not any required prerequisites are missing."
+  >
+  </target>
+
+  <target
+    name="prepare.project"
+    description="Creates all necessary directories."
+  >
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${build.classes}"/>
+    <mkdir dir="${build.dist}"/>
+  </target>
+
+  <target
+    name="clean.project"
+    description="Removes all build related directories."
+  >
+    <delete dir="${build.dist}"/>
+    <delete dir="${build.classes}"/>
+    <delete dir="${build.dir}"/>
+  </target>
+
+  <target
+    name="compile"
+    description="Compiles all standard source code."
+    depends="prepare.project"
+  >
+    <javac
+      classpathref="classpath.build"
+      srcdir="${source.classes}"
+      destdir="${build.classes}"
+      debug="${javac.debug}"
+      deprecation="${javac.deprecation}"
+      optimize="${javac.optimize}"
+      source="${javac.source}"
+    >
+    </javac>
+  </target>
+
+  <target
+    name="dist.project"
+    description="Creates the application distribution"
+    depends="compile"
+  >
+    <jar
+      jarfile="${build.dist.app}"
+      basedir="${build.classes}"
+    >
+      <fileset
+        dir="${source.resources}"
+      >
+        <include name="**/*"/>
+      </fileset>
+      <manifest>
+        <attribute name="Main-Class" value="${main.class}"/>
+      </manifest>
+    </jar>
+    <copy todir="${build.dist}">
+      <fileset dir="${project.lib}">
+        <include name="*.jar"/>
+        <exclude name="junit.jar"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target
+    name="run"
+    depends="compile"
+    description="Runs the application."
+  >
+    <java
+      classname="${main.class}"
+      fork="true"
+    >
+      <classpath refid="classpath.run"/>
+      <jvmarg value="-Xmx512000"/>
+    </java>
+  </target>
+</project>
